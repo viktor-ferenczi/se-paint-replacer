@@ -1,114 +1,85 @@
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Elements;
-using Sandbox.Graphics.GUI;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using VRage.Input;
+using VRage.Utils;
 using VRageMath;
 
 
 namespace ClientPlugin
 {
-    public enum ExampleEnum
-    {
-        FirstAlpha,
-        SecondBeta,
-        ThirdGamma,
-        AndTheDelta,
-        Epsilon
-    }
-
     public class Config : INotifyPropertyChanged
     {
         #region Options
 
-        // TODO: Define your configuration options and their default values
-        private bool toggle = true;
-        private int integer = 2;
-        private float number = 0.1f;
-        private string text = "Default Text";
-        private ExampleEnum dropdown = ExampleEnum.FirstAlpha;
-        private Color color = Color.Cyan;
-        private Color colorWithAlpha = new Color(0.8f, 0.6f, 0.2f, 0.5f);
-        private Binding keybind = new Binding(MyKeys.None);
+        private bool showHints = true;
+        private float textPosition = 0.70f;
+        private Color hintColor = new Color(0xdd, 0xdd, 0);
+        private int textShadowOffset = 2;
+        private Color textShadowColor = new Color(0, 0, 0, 0xcc);
+
+        private int highlightDensity = 2;
+        private Color aimedColor = Color.Blue;
+
+        // Not configurable yet
+        public readonly MyStringId BlockMaterial = MyStringId.GetOrCompute("ContainerBorderSelected");
 
         #endregion
 
         #region User interface
 
-        // TODO: Settings dialog title
-        public readonly string Title = "Config Demo";
+        public readonly string Title = "Paint Replacer";
 
-        // TODO: Settings dialog controls, one property for each configuration option
-
-        [Checkbox(description: "Checkbox Tooltip")]
-        public bool Toggle
+        [Separator("Overlay")]
+        [Checkbox(description: "Enable showing the hints on screen")]
+        public bool ShowHints
         {
-            get => toggle;
-            set => SetField(ref toggle, value);
+            get => showHints;
+            set => SetField(ref showHints, value);
         }
 
-        [Slider(-1f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Integer Slider Tooltip")]
-        public int Integer
+        [Slider(0f, 0.9f, 0.01f, description: "Vertical position of the hints on the screen")]
+        public float TextPosition
         {
-            get => integer;
-            set => SetField(ref integer, value);
+            get => textPosition;
+            set => SetField(ref textPosition, value);
         }
 
-        [Slider(-5f, 4.5f, 0.5f, SliderAttribute.SliderType.Float, description: "Float Slider Tooltip")]
-        public float Number
+        [Color(description: "Hint text color")]
+        public Color HintColor
         {
-            get => number;
-            set => SetField(ref number, value);
+            get => hintColor;
+            set => SetField(ref hintColor, value);
         }
 
-        [Textbox(description: "Textbox Tooltip")]
-        public string Text
+        [Slider(0f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Text shadow offset (set to zero to turn off text shadows)")]
+        public int TextShadowOffset
         {
-            get => text;
-            set => SetField(ref text, value);
+            get => textShadowOffset;
+            set => SetField(ref textShadowOffset, value);
         }
 
-        [Dropdown(description: "Dropdown Tooltip")]
-        public ExampleEnum Dropdown
+        [Color(hasAlpha: true, description: "Text shadow color")]
+        public Color TextShadowColor
         {
-            get => dropdown;
-            set => SetField(ref dropdown, value);
+            get => textShadowColor;
+            set => SetField(ref textShadowColor, value);
         }
 
-        [Color(description: "RGB color")]
-        public Color Color
+        [Separator("Block Selection")]
+        [Slider(1f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Density of the block highlight (number of overdraws)")]
+        public int HighlightDensity
         {
-            get => color;
-            set => SetField(ref color, value);
+            get => highlightDensity;
+            set => SetField(ref highlightDensity, value);
         }
 
-        [Color(hasAlpha: true, description: "RGBA color")]
-        public Color ColorWithAlpha
+        [Color(description: "Highlight color of the aimed block")]
+        public Color AimedColor
         {
-            get => colorWithAlpha;
-            set => SetField(ref colorWithAlpha, value);
-        }
-
-        [Keybind(description: "Keybind Tooltip - Unbind by right clicking the button")]
-        public Binding Keybind
-        {
-            get => keybind;
-            set => SetField(ref keybind, value);
-        }
-
-        [Button(description: "Button Tooltip")]
-        public void Button()
-        {
-            MyGuiSandbox.AddScreen(MyGuiSandbox.CreateMessageBox(
-                MyMessageBoxStyleEnum.Info,
-                buttonType: MyMessageBoxButtonsType.OK,
-                messageText: new StringBuilder("You clicked me!"),
-                messageCaption: new StringBuilder("Custom Button Function"),
-                size: new Vector2(0.6f, 0.5f)
-            ));
+            get => aimedColor;
+            set => SetField(ref aimedColor, value);
         }
 
         #endregion
