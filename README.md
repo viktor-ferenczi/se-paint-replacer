@@ -51,7 +51,7 @@ Alternatively you can open the settings by double-clicking on this plugin in the
 dialog of Plugin Loader, then clicking **Settings** in the dialog opened.
 The configuration can be changed anytime without having to restart the game.
 
-![Configuration](doc/ConfigDialog.png "Config Dialog")
+![Configuration](Doc/ConfigDialog.png "Config Dialog")
 
 ## Known issues
 

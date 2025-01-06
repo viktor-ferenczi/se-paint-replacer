@@ -21,6 +21,7 @@ namespace ClientPlugin
 
         private int highlightDensity = 2;
         private Color aimedColor = Color.Blue;
+        private bool previewPaint = true;
 
         // Not configurable yet
         public readonly MyStringId BlockMaterial = MyStringId.GetOrCompute("ContainerBorderSelected");
@@ -80,6 +81,13 @@ namespace ClientPlugin
         {
             get => aimedColor;
             set => SetField(ref aimedColor, value);
+        }
+
+        [Checkbox(description: "Enable previewing of the paint on the aimed block")]
+        public bool PreviewPaint
+        {
+            get => previewPaint;
+            set => SetField(ref previewPaint, value);
         }
 
         #endregion

@@ -26,6 +26,8 @@ namespace ClientPlugin.Logic
         // State
         private bool active;
         private MySlimBlock aimedBlock;
+        private Vector3? aimedColorMaskHsv;
+        private MyStringHash? aimedSkinSubtypeId;
         private Vector3? paintColorMaskHsv;
         private MyStringHash? paintSkinSubtypeId;
 
@@ -35,14 +37,6 @@ namespace ClientPlugin.Logic
         private static readonly MethodInfo ApplySkinGetter = AccessTools.PropertyGetter(MyGuiScreenColorPickerType, "ApplySkin");
         private static readonly MethodInfo ClearRenderData = AccessTools.DeclaredMethod(typeof(MyCubeBuilder), "ClearRenderData");
         private static readonly FieldInfo ScreensField = AccessTools.DeclaredField(typeof(MyScreenManager), "m_screens");
-
-        public void Reset()
-        {
-            active = false;
-            aimedBlock = null;
-            paintColorMaskHsv = null;
-            paintSkinSubtypeId = null;
-        }
 
         private bool IsInActiveSession()
         {
@@ -64,15 +58,70 @@ namespace ClientPlugin.Logic
                 return true;
             }
 
-            active = true;
-            aimedBlock = active ? MyCubeBuilderHelper.GetAimedBlock() : null;
+            GetSelectedPaint();
+            ActivateOnAimedBlock();
 
-            // Logic copied from MyCubeBuilder.HandleGameInput
+            // Input logic copied from MyCubeBuilder.HandleGameInput
             var context = MySession.Static.ControlledEntity?.AuxiliaryContext ?? MyStringId.NullOrEmpty;
             if (MyControllerHelper.IsControl(context, MyControlsSpace.CUBE_COLOR_CHANGE, MyControlStateType.PRESSED))
+            {
                 ReplacePaint();
+                Reset();
+            }
 
             return true;
+        }
+
+        private void Reset()
+        {
+            if (!active)
+                return;
+
+            RestorePreviewPaint();
+
+            active = false;
+            aimedBlock = null;
+            aimedColorMaskHsv = null;
+            aimedSkinSubtypeId = null;
+            paintColorMaskHsv = null;
+            paintSkinSubtypeId = null;
+        }
+
+        private void GetSelectedPaint()
+        {
+            // Logic copied from the MyCubeBuilder.Change method to get the color and skin to paint with.
+            // Must use reflection because the MyGuiScreenColorPicker class is internal.
+            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>()) ? new Vector3?(MyPlayer.SelectedColor) : null;
+            paintSkinSubtypeId = (bool)ApplySkinGetter.Invoke(null, Array.Empty<object>()) ? new MyStringHash?(MyStringHash.GetOrCompute(MyPlayer.SelectedArmorSkin)) : null;
+        }
+
+        private void ActivateOnAimedBlock()
+        {
+            active = true;
+
+            var currentlyAimedBlock = active ? MyCubeBuilderHelper.GetAimedBlock() : null;
+
+            // Continue aiming at the same block?
+            if (currentlyAimedBlock != null && aimedBlock != null &&
+                currentlyAimedBlock.CubeGrid?.EntityId == aimedBlock.CubeGrid?.EntityId &&
+                currentlyAimedBlock.Min == aimedBlock.Min)
+                return;
+
+            RestorePreviewPaint();
+
+            aimedBlock = currentlyAimedBlock;
+
+            aimedColorMaskHsv = aimedBlock?.ColorMaskHSV;
+            aimedSkinSubtypeId = aimedBlock?.SkinSubtypeId;
+
+            if (Cfg.PreviewPaint && aimedBlock != null)
+                aimedBlock.CubeGrid.SkinBlocks(aimedBlock.Position, aimedBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+        }
+
+        private void RestorePreviewPaint()
+        {
+            if (Cfg.PreviewPaint && aimedBlock != null)
+                aimedBlock.CubeGrid.SkinBlocks(aimedBlock.Position, aimedBlock.Position, aimedColorMaskHsv, aimedSkinSubtypeId, false);
         }
 
         private void ReplacePaint()
@@ -81,14 +130,6 @@ namespace ClientPlugin.Logic
             if (aimedGrid == null || aimedGrid.Closed || !aimedGrid.InScene || aimedGrid.Physics == null)
                 return;
 
-            var aimedColorMaskHsv = aimedBlock.ColorMaskHSV;
-            var aimedSkinSubtypeId = aimedBlock.SkinSubtypeId;
-
-            // Logic copied from the MyCubeBuilder.Change method to get the color and skin to paint with.
-            // Must use reflection because the MyGuiScreenColorPicker class is internal.
-            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>()) ? new Vector3?(MyPlayer.SelectedColor) : null;
-            paintSkinSubtypeId = (bool)ApplySkinGetter.Invoke(null, Array.Empty<object>()) ? new MyStringHash?(MyStringHash.GetOrCompute(MyPlayer.SelectedArmorSkin)) : null;
-
             var ctrl = MyInput.Static.IsAnyCtrlKeyPressed();
             var shift = MyInput.Static.IsAnyShiftKeyPressed();
 
@@ -96,24 +137,30 @@ namespace ClientPlugin.Logic
 
             if (subgrids == null)
             {
-                ReplacePaint(aimedGrid, aimedColorMaskHsv, aimedSkinSubtypeId);
-                return;
+                ReplacePaint(aimedGrid);
+            }
+            else
+            {
+                foreach (var subgrid in subgrids)
+                    ReplacePaint(subgrid);
             }
 
-            foreach (var subgrid in subgrids)
-            {
-                ReplacePaint(subgrid, aimedColorMaskHsv, aimedSkinSubtypeId);
-            }
+            // The aimed block must retain its preview paint
+            aimedColorMaskHsv = paintColorMaskHsv;
+            aimedSkinSubtypeId = paintSkinSubtypeId;
         }
 
-        private void ReplacePaint(MyCubeGrid grid, Vector3 aimedColorMaskHsv, MyStringHash aimedSkinSubtypeId)
+        private void ReplacePaint(MyCubeGrid grid)
         {
+            if (aimedColorMaskHsv == null || aimedSkinSubtypeId == null)
+                return;
+
             foreach (var slimBlock in grid.CubeBlocks)
             {
-                if (slimBlock.SkinSubtypeId != aimedSkinSubtypeId)
+                if (slimBlock.SkinSubtypeId != aimedSkinSubtypeId.Value)
                     continue;
 
-                if ((slimBlock.ColorMaskHSV - aimedColorMaskHsv).AbsMax() > 0.005f * 0.005f)
+                if ((slimBlock.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() > 0.005f * 0.005f)
                     continue;
 
                 grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
