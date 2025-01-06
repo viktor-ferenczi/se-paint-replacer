@@ -1,69 +1,110 @@
-# Space Engineers Client Plugin Template
+# Paint Replacer
 
-[Server/Client version of the template](https://github.com/sepluginloader/PluginTemplate)
+**Paint Replacer** is a **Space Engineers plugin**, which allows for **replacing a specific paint** 
+(color and skin) on a ship or station. This plugin makes repainting ships way easier.
+
+For support please [join the SE Mods Discord](https://discord.gg/PYPFPGf3Ca).
+
+Please consider supporting my work on [Patreon](https://www.patreon.com/semods) or one time via [PayPal](https://www.paypal.com/paypalme/vferenczi/).
+
+*Thank you and enjoy!*
+
+## Usage
+
+[Demo Video](https://www.youtube.com/watch?v=W0S-wIaIZ80)
+
+Activate the paint replacement mode by holding down the **Alt** key while aiming at a block.
+The aiming algorithm is based on physics intersection test (raycast) for better control over
+the block selection. The aimed block will be clearly highlighted.
+
+- **Alt+MMB**: Replace the paint on the aimed subgrid.
+- **Ctrl+Alt+MMB**: Replace the paint on the mechanical group (all subgrids).
+- **Ctrl+Shift+Alt+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
+
+### Remarks
+
+The block distance from the character is the same as normal block placement in creative mode.
+You can change the maximum distance of the aimed block by keeping any block at hand while
+Sections is **not** active and using the `Ctrl-MouseWheel` to change the distance.
+
+I suggest selecting no tool in hand (`0` key) while replacing colors, because it would just be in the way.
+
+Symmetry mode is not relevant, because the replacement is based on matching the color and skin instead of block positions.
 
 ## Prerequisites
 
 - [Space Engineers](https://store.steampowered.com/app/244850/Space_Engineers/)
-- [Python 3.x](https://python.org) (tested with 3.9)
-- [Plugin Loader](https://github.com/sepluginloader/PluginLoader/)
-- [.NET Framework 4.8.1 Developer Pack](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481)
+- [Plugin Loader](https://github.com/sepluginloader/SpaceEngineersLauncher)
 
-## Create your plugin project
+## Installation
 
-1. Click on **Use this template** (top right corner on GitHub) and follow the wizard to create your repository
-2. Clone your repository to have a local working copy
-3. Run `setup.py`, enter the name of your plugin project in `CapitalizedWords` format
-4. Let `setup.py` auto-detect your install location or fill it in manually
-5. Open the solution in Visual Studio or Rider
-6. Make a test build, the plugin's DLL should be deployed (see the build log for the path)
-7. Test that the empty plugin can be enabled in Plugin Loader
-8. Replace the contents of this file with the description of your plugin
-9. Follow the TODO comments in the source code
+1. Install Plugin Loader's [Space Engineers Launcher](https://github.com/sepluginloader/SpaceEngineersLauncher)
+2. Run the game
+3. In the **Plugins** menu add the **Sections** plugin
+4. Apply and restart the game as requested
 
-## Remarks
+## Configuration
 
-### Plugin configuration
+Press `Ctrl-Alt-/` while in-game and not in the GUI. It will open the list of
+configurable plugins. Select **Paint Replacer** from the list to configure this plugin.
+Alternatively you can open the settings by double-clicking on this plugin in the Plugins
+dialog of Plugin Loader, then clicking **Settings** in the dialog opened.
+The configuration can be changed anytime without having to restart the game.
 
-You can have a nice configuration dialog with little effort in the game client.
-Customize the `Config` class in the `ClientPlugin` project, just follow the examples.
-It supports many different data types, including key binding. Once you have more
-options than can fit on the screen the dialog will have a vertical scrollbar.
+![Configuration](doc/ConfigDialog.png "Config Dialog")
 
-![Example config dialog](Doc/ConfigDialogExample.png "Example config dialog")
+## Known issues
 
-### Debugging
+- Aiming to camera blocks is not possible, it may also be the case with other blocks with a very small hitbox.
+- Painting a single block is not possible, which it may be useful due to the different aiming method. 
 
-- Always use a debug build if you want to set breakpoints and see variable values.
-- A debug build defines `DEBUG`, so you can add conditional code in `#if DEBUG` blocks.
-- While debugging a specific target unload the other two. It prevents the IDE to be confused.
-- If breakpoints do not "stick" or do not work, then make sure that:
-  - Other projects are unloaded, only the debugged one and Shared are loaded.
-  - Debugger is attached to the running process.
-  - You are debugging the code which is running (no code changes made since the build).
+## Legal
 
-### Troubleshooting
+Space Engineers is a trademark of Keen Software House s.r.o.
 
-- If the IDE looks confused, then restarting it and the debugged game usually works.
-- If the restart did not work, then try to delete caches used by your IDE and restart.
-- If your build cannot deploy (just runs in a loop), then something locks the DLL file.
-- Look for running game processes (maybe stuck running in the background) and kill them.
+## Want to know more?
 
-### Release
+- [SE Mods Discord](https://discord.gg/PYPFPGf3Ca) FAQ, Troubleshooting, Support, Bug Reports, Discussion
+- [Plugin Loader Discord](https://discord.gg/6ETGRU3CzR) Everything about plugins
+- [YouTube Channel](https://www.youtube.com/channel/UCc5ar3cW9qoOgdBb1FM_rxQ)
+- [Source code](https://github.com/viktor-ferenczi/se-sections)
+- [Bug reports](https://discord.gg/x3Z8Ug5YkQ)
 
-- Always make your final release from a RELEASE build. (More optimized, removes debug code.)
-- Always test your RELEASE build before publishing. Sometimes is behaves differently.
-- In case of client plugins the Plugin Loader compiles your code, watch out for differences.
+## Patreon Supporters
 
-### Communication
+_in alphabetical order_
 
-- In your documentation always include how players or server admins should report bugs.
-- Try to be reachable and respond on a timely manner over your communication channels.
-- Be open for constructive critics.
+#### Admiral level
+- BetaMark
+- Casinost
+- Mordith - Guardians SE
+- Robot10
+- wafoxxx
 
-### Abandoning your project
+#### Captain level
+- Diggz
+- jiringgot
+- Jimbo
+- Kam Solastor
+- lazul
+- Linux123123
+- Lotan
+- Lurking StarCpt
+- NeonDrip
+- NeVaR
+- opesoorry
 
-- Always consider finding a new maintainer, ask around at least once.
-- If you ever abandon the project, then make it clear on its GitHub page.
-- Abandoned projects should be made hidden on PluginHub and Torch's plugin list.
-- Keep the code available on GitHub, so it can be forked and continued by others.
+#### Testers
+- Avaness
+- mkaito
+
+### Creators
+- avaness - Plugin Loader
+- Fred XVI - Racing maps
+- Kamikaze - M&M mod
+- LTP
+- Mordith - Guardians SE
+- Mike Dude - Guardians SE
+- SwiftyTech - Stargate Dimensions
+
+**Thank you very much for all your support!**
