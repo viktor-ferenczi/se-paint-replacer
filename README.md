@@ -1,4 +1,4 @@
-# Paint Replacer
+![Paint Replacer](Doc/Thumbnail.png "Paint Replacer")
 
 **Paint Replacer** is a **Space Engineers plugin**, which allows for **replacing a specific paint** 
 (color and skin) on a ship or station. This plugin makes repainting ships way easier.
@@ -11,7 +11,7 @@ Please consider supporting my work on [Patreon](https://www.patreon.com/semods) 
 
 ## Usage
 
-[Demo Video](https://www.youtube.com/watch?v=W0S-wIaIZ80)
+[Demo Video](https://youtu.be/8r47laAgTI8)
 
 Activate the paint replacement mode by holding down the **Alt** key while aiming at a block.
 The aiming algorithm is based on physics intersection test (raycast) for better control over
