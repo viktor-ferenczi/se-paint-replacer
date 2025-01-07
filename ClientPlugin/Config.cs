@@ -19,8 +19,8 @@ namespace ClientPlugin
         private int textShadowOffset = 2;
         private Color textShadowColor = new Color(0, 0, 0, 0xcc);
 
-        private int highlightDensity = 2;
-        private Color aimedColor = Color.Blue;
+        private int highlightDensity = 1;
+        private Color aimedColor = Color.White;
         private bool previewPaint = true;
 
         // Not configurable yet
@@ -69,14 +69,14 @@ namespace ClientPlugin
         }
 
         [Separator("Block Selection")]
-        [Slider(1f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Density of the block highlight (number of overdraws)")]
+        [Slider(0f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Density of the block highlight (number of overdraws, zero disables highlighting)")]
         public int HighlightDensity
         {
             get => highlightDensity;
             set => SetField(ref highlightDensity, value);
         }
 
-        [Color(description: "Highlight color of the aimed block")]
+        [Color(description: "Highlight color of the aimed block", hasAlpha: true)]
         public Color AimedColor
         {
             get => aimedColor;

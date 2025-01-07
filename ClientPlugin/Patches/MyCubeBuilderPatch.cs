@@ -11,7 +11,7 @@ namespace ClientPlugin.Patches
     public static class MyCubeBuilderPatch
     {
         [HarmonyPrefix]
-        [HarmonyAfter("Sections")]
+        [HarmonyBefore("Sections")]
         [HarmonyPatch(nameof(MyCubeBuilder.HandleGameInput))]
         private static bool HandleGameInputPrefix()
         {
@@ -19,6 +19,7 @@ namespace ClientPlugin.Patches
         }
         
         [HarmonyPrefix]
+        [HarmonyBefore("Sections")]
         [HarmonyPatch(nameof(MyCubeBuilder.Draw))]
         private static bool DrawPrefix(MyCubeBuilder __instance)
         {
