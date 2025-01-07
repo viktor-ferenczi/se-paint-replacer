@@ -176,10 +176,6 @@ namespace ClientPlugin.Logic
             if (MyGuiScreenTerminal.IsOpen)
                 return true;
 
-            // Do not draw over the terminal
-            if (MyGuiScreenTerminal.IsOpen)
-                return true;
-
             // Do not draw over the Blueprints screen (F10)
             var screens = ScreensField.GetValue(null) as List<MyGuiScreenBase>;
             if (screens == null)
@@ -212,6 +208,15 @@ namespace ClientPlugin.Logic
             return false;
         }
 
+        private void DrawBlock(MySlimBlock block, Color color)
+        {
+            var v4Color = color.ToVector4();
+            for (var i = 0; i < Cfg.HighlightDensity; i++)
+            {
+                MyCubeBuilder.DrawSemiTransparentBox(aimedBlock.CubeGrid, block, v4Color, lineMaterial: Cfg.BlockMaterial, lineColor: v4Color, onlyWireframe: true);
+            }
+        }
+        
         private void DrawHint(string text, int lineNumber, float x)
         {
             if (!Cfg.ShowHints)
@@ -233,15 +238,6 @@ namespace ClientPlugin.Logic
             }
 
             MyRenderProxy.DebugDrawText2D(screenCoord, text, color, scale, center ? MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP);
-        }
-
-        private void DrawBlock(MySlimBlock block, Color color)
-        {
-            var v4Color = color.ToVector4();
-            for (var i = 0; i < Cfg.HighlightDensity; i++)
-            {
-                MyCubeBuilder.DrawSemiTransparentBox(aimedBlock.CubeGrid, block, v4Color, lineMaterial: Cfg.BlockMaterial, lineColor: v4Color);
-            }
         }
     }
 }
