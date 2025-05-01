@@ -19,12 +19,12 @@ if "%SOURCE:~-1%"=="\" set SOURCE=%SOURCE:~0,-1%
 if "%BIN64:~-1%"=="\" set BIN64=%BIN64:~0,-1%
 
 REM Get the plugin directory
-set PLUGIN_DIR=%BIN64%\Plugins\Local
+set PLUGIN_DIR=%BIN64%\Pulsar\Legacy\Local
 
-REM Create this directory if it does not exist
+REM Fail if the directory does not exist
 if not exist "%PLUGIN_DIR%" (
-    echo Creating "Local\" folder in "%BIN64%\Plugins\"
-    mkdir "%PLUGIN_DIR%" >NUL 2>&1
+    echo "Missing directory: %PLUGIN_DIR%"
+    exit 1
 )
 
 REM Copy the plugin into the plugin directory
