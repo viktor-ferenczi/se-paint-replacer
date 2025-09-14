@@ -49,10 +49,25 @@ namespace ClientPlugin.Logic
                    MyInput.Static != null &&
                    MySandboxGame.Static != null;
         }
+        
+        private bool IsCharacterSeated()
+        {
+            return MySession.Static?.LocalCharacter != null &&
+                   MySession.Static.LocalCharacter.IsSitting;
+        }
+
+        private bool IsCharacterInFirstPersonView()
+        {
+            return MySession.Static?.LocalCharacter != null &&
+                   MySession.Static.LocalCharacter.IsInFirstPersonView;
+        }
 
         public bool HandleGameInputPrefix()
         {
-            if (!MyInput.Static.IsAnyAltKeyPressed() || !IsInActiveSession())
+            if (!MyInput.Static.IsAnyAltKeyPressed() || 
+                !IsInActiveSession() || 
+                IsCharacterSeated() || 
+                !IsCharacterInFirstPersonView())
             {
                 Reset();
                 return true;
