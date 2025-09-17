@@ -9,6 +9,7 @@ using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Cube;
 using Sandbox.Game.Gui;
+using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
 using VRage.Input;
@@ -62,12 +63,19 @@ namespace ClientPlugin.Logic
                    MySession.Static.LocalCharacter.IsInFirstPersonView;
         }
 
+        private bool IsEnabledInGameMode()
+        {
+            var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
+            return isCreative ? Cfg.EnableInCreative : Cfg.EnableInSurvival;
+        }
+
         public bool HandleGameInputPrefix()
         {
             if (!MyInput.Static.IsAnyAltKeyPressed() || 
                 !IsInActiveSession() || 
-                IsCharacterSeated() || 
-                !IsCharacterInFirstPersonView())
+                IsCharacterSeated() ||
+                !IsCharacterInFirstPersonView() ||
+                !IsEnabledInGameMode())
             {
                 Reset();
                 return true;
