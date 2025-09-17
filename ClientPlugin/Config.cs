@@ -13,6 +13,9 @@ namespace ClientPlugin
     {
         #region Options
 
+        private bool enableInCreative = true;
+        private bool enableInSurvival;
+
         private bool showHints = true;
         private float textPosition = 0.70f;
         private Color hintColor = new Color(0xdd, 0xdd, 0);
@@ -31,6 +34,21 @@ namespace ClientPlugin
         #region User interface
 
         public readonly string Title = "Paint Replacer";
+
+        [Separator("Enable")]
+        [Checkbox(description: "Enable in creative mode")]
+        public bool EnableInCreative
+        {
+            get => enableInCreative;
+            set => SetField(ref enableInCreative, value);
+        }
+
+        [Checkbox(description: "Enable in survival mode")]
+        public bool EnableInSurvival
+        {
+            get => enableInSurvival;
+            set => SetField(ref enableInSurvival, value);
+        }
 
         [Separator("Overlay")]
         [Checkbox(description: "Enable showing the hints on screen")]
