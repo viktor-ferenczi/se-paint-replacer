@@ -1,9 +1,7 @@
-![Paint Replacer](Doc/Thumbnail.png "Paint Replacer")
+![Paint Replacer](Docs/Thumbnail.png "Paint Replacer")
 
 **Paint Replacer** is a **Space Engineers plugin**, which allows for **replacing a specific paint** 
 (color and skin) on a ship or station. This plugin makes repainting ships way easier.
-
-For support please [join the SE Mods Discord](https://discord.gg/PYPFPGf3Ca).
 
 Please consider supporting my work on [Patreon](https://www.patreon.com/semods) or one time via [PayPal](https://www.paypal.com/paypalme/vferenczi/).
 
@@ -21,11 +19,17 @@ the block selection. The aimed block will be clearly highlighted.
 - **Ctrl+Alt+MMB**: Replace the paint on the mechanical group (all subgrids).
 - **Ctrl+Shift+Alt+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
 
+Please note, that **the MMB conflicts with the "dump inventory" shortcut**, which is frequently used in survival
+mode. Because of this the plugin is disabled by default in survival mode. Enable it in the configuration dialog
+(see below) only as long as you need it, then disable it again to avoid accidental painting. No need to
+restart the game on changing the configuration, it has immediate effect. In creative mode this conflict is
+usually not a problem, because the player does not have to deal with inventory directly.
+
 ### Remarks
 
 The block distance from the character is the same as normal block placement in creative mode.
 You can change the maximum distance of the aimed block by keeping any block at hand while
-Sections is **not** active and using the `Ctrl-MouseWheel` to change the distance.
+with `Ctrl-MouseWheel` to change the distance.
 
 I suggest selecting no tool in hand (`0` key) while replacing colors, because it would just be in the way.
 
@@ -34,13 +38,13 @@ Symmetry mode is not relevant, because the replacement is based on matching the 
 ## Prerequisites
 
 - [Space Engineers](https://store.steampowered.com/app/244850/Space_Engineers/)
-- [Plugin Loader](https://github.com/sepluginloader/SpaceEngineersLauncher)
+- [Pulsar](https://github.com/SpaceGT/Pulsar)
 
 ## Installation
 
-1. Install Plugin Loader's [Space Engineers Launcher](https://github.com/sepluginloader/SpaceEngineersLauncher)
+1. Install Pulsar(https://github.com/StarCpt/Pulsar-Installer/releases)
 2. Run the game
-3. In the **Plugins** menu add the **Sections** plugin
+3. In the **Plugins** menu add the **Paint Replacer** plugin
 4. Apply and restart the game as requested
 
 ## Configuration
@@ -48,10 +52,10 @@ Symmetry mode is not relevant, because the replacement is based on matching the 
 Press `Ctrl-Alt-/` while in-game and not in the GUI. It will open the list of
 configurable plugins. Select **Paint Replacer** from the list to configure this plugin.
 Alternatively you can open the settings by double-clicking on this plugin in the Plugins
-dialog of Plugin Loader, then clicking **Settings** in the dialog opened.
+dialog of Pulsar, then clicking **Settings** in the dialog opened. 
 The configuration can be changed anytime without having to restart the game.
 
-![Configuration](Doc/ConfigDialog.png "Config Dialog")
+![Configuration](Docs/ConfigDialog.png "Config Dialog")
 
 ## Known issues
 
@@ -64,8 +68,7 @@ Space Engineers is a trademark of Keen Software House s.r.o.
 
 ## Want to know more?
 
-- [SE Mods Discord](https://discord.gg/PYPFPGf3Ca) FAQ, Troubleshooting, Support, Bug Reports, Discussion
-- [Plugin Loader Discord](https://discord.gg/6ETGRU3CzR) Everything about plugins
+- [Pulsar Discord](https://discord.gg/z8ZczP2YZY) Plugin discussion, support requests
 - [YouTube Channel](https://www.youtube.com/channel/UCc5ar3cW9qoOgdBb1FM_rxQ)
 - [Source code](https://github.com/viktor-ferenczi/se-sections)
 - [Bug reports](https://discord.gg/x3Z8Ug5YkQ)
@@ -99,7 +102,8 @@ _in alphabetical order_
 - mkaito
 
 ### Creators
-- avaness - Plugin Loader
+- Space - Pulsar
+- avaness - Plugin Loader (legacy)
 - Fred XVI - Racing maps
 - Kamikaze - M&M mod
 - LTP
