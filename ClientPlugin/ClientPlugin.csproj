@@ -1,40 +1,51 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{49F4A024-2F50-49B0-982E-0C4219FED156}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ClientPlugin</RootNamespace>
     <AssemblyName>PaintReplacer</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>13</LangVersion>
+
+    <!-- Ensure SDK generates assembly attributes (no need for AssemblyInfo) -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <!-- Default versions; override in Directory.Build.props  -->
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+
+    <!-- Default configuration if none supplied -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+
+    <!-- Keep original behaviour for post/pre build events -->
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;DEV_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEV_BUILD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="DirectShowLib, Version=2.1.0.1599, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(Bin64)\DirectShowLib.dll</HintPath>
@@ -614,47 +625,51 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="Extensions\MyCubeGridExtensions.cs" />
-    <Compile Include="Logic\Logic.cs" />
-    <Compile Include="Patches\MyCubeBuilderPatch.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\ConfigStorage.cs" />
-    <Compile Include="Settings\Elements\Button.cs" />
-    <Compile Include="Settings\Elements\Checkbox.cs" />
-    <Compile Include="Settings\Elements\Color.cs" />
-    <Compile Include="Settings\Elements\Control.cs" />
-    <Compile Include="Settings\Elements\Dropdown.cs" />
-    <Compile Include="Settings\Elements\Element.cs" />
-    <Compile Include="Settings\Elements\Keybind.cs" />
-    <Compile Include="Settings\Elements\Separator.cs" />
-    <Compile Include="Settings\Elements\Slider.cs" />
-    <Compile Include="Settings\Elements\Textbox.cs" />
-    <Compile Include="Settings\Layouts\Layout.cs" />
-    <Compile Include="Settings\Layouts\None.cs" />
-    <Compile Include="Settings\Layouts\Simple.cs" />
-    <Compile Include="Settings\SettingsGenerator.cs" />
-    <Compile Include="Settings\SettingsScreen.cs" />
-    <Compile Include="Settings\Tools\Binding.cs" />
-    <Compile Include="Settings\Tools\Tools.cs" />
-    <Compile Include="Helpers\MyCubeBuilderHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="deploy.bat" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="Deploy.bat" />
     <None Include="App.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.3.3" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.6" />
+    <!-- Uncomment to enable publicizer support  
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    -->
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+  <ItemGroup>
+    <Compile Remove="Patches\ExampleTranspilerPatch.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Patches\" />
+  </ItemGroup>
+
+  <!-- Uncomment to enable publicizer support
   <PropertyGroup>
-    <PreBuildEvent>call "$(SolutionDir)verify_props.bat" "$(Bin64)"</PreBuildEvent>
+    <PublicizerClearCacheOnClean>true</PublicizerClearCacheOnClean>
+    <PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
+    <PublicizerLogFilePath>$(MSBuildProjectDirectory)\$(OutputPath)Krafs.Publicizer.log</PublicizerLogFilePath>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Publicize Include="Sandbox.Game"/>
+    <Publicize Include="SpaceEngineers.Game"/>
+    <DoNotPublicize Include="Sandbox.Game:Sandbox.Game.Entities.MyEntities.OnEntityAdd"/>
+    <DoNotPublicize Include="Sandbox.Game:Sandbox.Game.Entities.MyEntities.OnEntityRemove"/>
+    <DoNotPublicize Include="Sandbox.Game:Sandbox.Game.Entities.MyCubeGrid.OnStaticChanged"/>
+  </ItemGroup>  
+  -->
+    
   <PropertyGroup>
-    <PostBuildEvent>call "$(ProjectDir)deploy.bat" "$(TargetFileName)" "$(TargetDir)" "$(Bin64)"</PostBuildEvent>
+    <PreBuildEvent>call "$(SolutionDir)\verify_props.bat" "$(Bin64)"</PreBuildEvent>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PostBuildEvent>call "$(MSBuildProjectDirectory)\Deploy.bat" "$(AssemblyName).dll" "$(MSBuildProjectDirectory)\$(OutputPath)$(TargetFramework)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

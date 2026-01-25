@@ -1,4 +1,4 @@
-![Paint Replacer](Doc/Thumbnail.png "Paint Replacer")
+![Paint Replacer](Docs/Thumbnail.png "Paint Replacer")
 
 **Paint Replacer** is a **Space Engineers plugin**, which allows for **replacing a specific paint** 
 (color and skin) on a ship or station. This plugin makes repainting ships way easier.
@@ -20,6 +20,12 @@ the block selection. The aimed block will be clearly highlighted.
 - **Alt+MMB**: Replace the paint on the aimed subgrid.
 - **Ctrl+Alt+MMB**: Replace the paint on the mechanical group (all subgrids).
 - **Ctrl+Shift+Alt+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
+
+Please note, that **the MMB conflicts with the "dump inventory" shortcut**, which is frequently used in survival
+mode. Because of this the plugin is disabled by default in survival mode. Enable it in the configuration dialog
+(see below) only as long as you need it, then disable it again to avoid accidental painting. No need to
+restart the game on changing the configuration, it has immediate effect. In creative mode this conflict is
+usually not a problem, because the player does not have to deal with inventory directly.
 
 ### Remarks
 
@@ -51,7 +57,7 @@ Alternatively you can open the settings by double-clicking on this plugin in the
 dialog of Plugin Loader, then clicking **Settings** in the dialog opened.
 The configuration can be changed anytime without having to restart the game.
 
-![Configuration](Doc/ConfigDialog.png "Config Dialog")
+![Configuration](Docs/ConfigDialog.png "Config Dialog")
 
 ## Known issues
 

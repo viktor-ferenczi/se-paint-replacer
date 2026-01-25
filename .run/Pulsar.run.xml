@@ -1,7 +1,7 @@
-<component name="ProjectRunConfigurationManager">
+﻿<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Pulsar" type="RunExe" factoryName=".NET Executable">
     <option name="EXE_PATH" value="$USER_HOME$/AppData/Roaming/Pulsar/Legacy.exe" />
-    <option name="PROGRAM_PARAMETERS" value="-skipintro -sources" />
+    <option name="PROGRAM_PARAMETERS" value="-skipintro" />
     <option name="WORKING_DIRECTORY" value="$USER_HOME$/AppData/Roaming/Pulsar" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <option name="USE_EXTERNAL_CONSOLE" value="0" />
