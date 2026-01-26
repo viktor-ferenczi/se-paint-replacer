@@ -12,6 +12,7 @@ using Sandbox.Game.Gui;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
+using VRage.Game.Entity.UseObject;
 using VRage.Input;
 using VRage.Utils;
 using VRageMath;
@@ -57,16 +58,41 @@ namespace ClientPlugin.Logic
                    MySession.Static.LocalCharacter.IsSitting;
         }
 
-        private bool IsCharacterInFirstPersonView()
+        private static bool IsCharacterInFirstPersonView()
         {
             return MySession.Static?.LocalCharacter != null &&
                    MySession.Static.LocalCharacter.IsInFirstPersonView;
         }
 
-        private bool IsEnabledInGameMode()
+        private static bool IsEnabledInGameMode()
         {
             var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
             return isCreative ? Cfg.EnableInCreative : Cfg.EnableInSurvival;
+        }
+
+        private static bool IsCurrentlyAimedConveyorPortHighlighted()
+        {
+            var selectedObject = MyHud.SelectedObjectHighlight;
+            if (selectedObject?.InteractiveObject == null || !selectedObject.Visible)
+                return false;
+
+            var useObject = selectedObject.InteractiveObject;
+
+            // Check if this is a conveyor/inventory use object by examining supported actions
+            // MyUseObjectInventory is marked with [MyUseObject("conveyor")] and [MyUseObject("inventory")]
+            // and has the following action combination:
+            var hasInventoryAccess = (useObject.SupportedActions & UseActionEnum.OpenInventory) != 0;
+            var hasTerminalAccess = (useObject.SupportedActions & UseActionEnum.OpenTerminal) != 0;
+            var isPrimaryInventory = useObject.PrimaryAction == UseActionEnum.OpenInventory;
+
+            // This combination indicates a conveyor/inventory access point
+            return hasInventoryAccess && hasTerminalAccess && isPrimaryInventory;
+        }
+
+        private static bool IsPaintingOverConveyorPortAllowed()
+        {
+            var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
+            return isCreative ? Cfg.PaintOverConveyorPortInCreative : Cfg.PaintOverConveyorPortInSurvival;
         }
 
         public bool HandleGameInputPrefix()
@@ -88,10 +114,13 @@ namespace ClientPlugin.Logic
             var context = MySession.Static.ControlledEntity?.AuxiliaryContext ?? MyStringId.NullOrEmpty;
             if (MyControllerHelper.IsControl(context, MyControlsSpace.CUBE_COLOR_CHANGE, MyControlStateType.PRESSED))
             {
-                ReplacePaint();
+                // Check if we should block painting on conveyor ports
+                if (IsPaintingOverConveyorPortAllowed() || !IsCurrentlyAimedConveyorPortHighlighted())
+                {
+                    ReplacePaint();
+                }
                 Reset();
             }
-
             return true;
         }
 
@@ -124,6 +153,10 @@ namespace ClientPlugin.Logic
 
             var currentlyAimedBlock = active ? MyCubeBuilderHelper.GetAimedBlock() : null;
 
+            // Special case when getting close to a conveyor port and it gets highlighted
+            if (aimedBlock != null && !IsPaintingOverConveyorPortAllowed() && IsCurrentlyAimedConveyorPortHighlighted())
+                currentlyAimedBlock = null;
+
             // Continue aiming at the same block?
             if (currentlyAimedBlock != null && aimedBlock != null &&
                 currentlyAimedBlock.CubeGrid?.EntityId == aimedBlock.CubeGrid?.EntityId &&
@@ -134,6 +167,13 @@ namespace ClientPlugin.Logic
 
             aimedBlock = currentlyAimedBlock;
 
+            // Special case when a conveyor port is highlighted
+            if (!IsPaintingOverConveyorPortAllowed() && IsCurrentlyAimedConveyorPortHighlighted())
+            {
+                aimedBlock = null;
+                return;
+            }
+            
             aimedColorMaskHsv = aimedBlock?.ColorMaskHSV;
             aimedSkinSubtypeId = aimedBlock?.SkinSubtypeId;
 
@@ -219,14 +259,22 @@ namespace ClientPlugin.Logic
 
             ClearRenderData.Invoke(cubeBuilder, Array.Empty<object>());
 
-            if (aimedBlock != null)
-                DrawBlock(aimedBlock, Cfg.AimedColor);
+            // Show warning if painting is blocked due to conveyor port
+            if (!IsPaintingOverConveyorPortAllowed() && IsCurrentlyAimedConveyorPortHighlighted())
+            {
+                DrawHint("Painting blocked because a conveyor port is highlighted", 1, -0.05f);
+            }
+            else
+            {
+                if (aimedBlock != null)
+                    DrawBlock(aimedBlock, Cfg.AimedColor);
 
-            DrawHint("Aim at the block with the paint to replace", 1, x: 0f);
-            DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, x: -0.12f);
-            DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 3, x: -0.12f);
-            DrawHint("Ctrl+Shift+Alt+MMB: Replace on all connected ships", 2, x: 0.12f);
-            DrawHint("Ctrl+Alt+/: Configure to hide these hints", 3, x: 0.12f);
+                DrawHint("Aim at the block with the paint to replace", 1, x: 0f);
+                DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, x: -0.12f);
+                DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 3, x: -0.12f);
+                DrawHint("Ctrl+Shift+Alt+MMB: Replace on all connected ships", 2, x: 0.12f);
+                DrawHint("Ctrl+Alt+/: Configure to hide these hints", 3, x: 0.12f);
+            }
 
             return false;
         }
