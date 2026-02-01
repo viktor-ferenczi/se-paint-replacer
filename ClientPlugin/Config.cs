@@ -1,8 +1,10 @@
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Elements;
+using ClientPlugin.Settings.Tools;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using VRage.Input;
 using VRage.Utils;
 using VRageMath;
 
@@ -26,6 +28,10 @@ namespace ClientPlugin
         private Color aimedColor = Color.White;
         private bool previewPaint = true;
 
+        private Binding modifierKey = new(MyKeys.None, alt: true);
+        private bool paintOverConveyorPortInCreative = true;
+        private bool paintOverConveyorPortInSurvival;
+        
         // Not configurable yet
         public readonly MyStringId BlockMaterial = MyStringId.GetOrCompute("ContainerBorderSelected");
 
@@ -48,6 +54,20 @@ namespace ClientPlugin
         {
             get => enableInSurvival;
             set => SetField(ref enableInSurvival, value);
+        }
+
+        [Checkbox(label: "Paint over conveyor port in creative", description: "Allow painting when facing a conveyor port in creative mode")]
+        public bool PaintOverConveyorPortInCreative
+        {
+            get => paintOverConveyorPortInCreative;
+            set => SetField(ref paintOverConveyorPortInCreative, value);
+        }
+
+        [Checkbox(label: "Paint over conveyor port in survival", description: "Allow painting when facing a conveyor port in survival mode")]
+        public bool PaintOverConveyorPortInSurvival
+        {
+            get => paintOverConveyorPortInSurvival;
+            set => SetField(ref paintOverConveyorPortInSurvival, value);
         }
 
         [Separator("Overlay")]

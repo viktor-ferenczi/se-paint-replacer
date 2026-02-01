@@ -11,19 +11,35 @@ Please consider supporting my work on [Patreon](https://www.patreon.com/semods) 
 
 [Demo Video](https://youtu.be/8r47laAgTI8)
 
-Activate the paint replacement mode by holding down the **Alt** key while aiming at a block.
+Activate the paint replacement mode by holding down the **modifier key** (default: **Alt**) while aiming at a block.
 The aiming algorithm is based on physics intersection test (raycast) for better control over
 the block selection. The aimed block will be clearly highlighted.
 
-- **Alt+MMB**: Replace the paint on the aimed subgrid.
-- **Ctrl+Alt+MMB**: Replace the paint on the mechanical group (all subgrids).
-- **Ctrl+Shift+Alt+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
+- **ModifierKey+MMB**: Replace the paint on the aimed subgrid.
+- **Ctrl+ModifierKey+MMB**: Replace the paint on the mechanical group (all subgrids).
+- **Ctrl+Shift+ModifierKey+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
 
-Please note, that **the MMB conflicts with the "dump inventory" shortcut**, which is frequently used in survival
-mode. Because of this the plugin is disabled by default in survival mode. Enable it in the configuration dialog
-(see below) only as long as you need it, then disable it again to avoid accidental painting. No need to
-restart the game on changing the configuration, it has immediate effect. In creative mode this conflict is
-usually not a problem, because the player does not have to deal with inventory directly.
+The modifier key is **configurable** in the settings (see Configuration section below). By default it is **Alt**, 
+but you can change it to any other key to avoid conflicts with other game functions.
+
+### Conveyor Port Protection
+
+By default, the plugin will **block painting when you're directly aiming at a conveyor port face** 
+(like the connection face on ship connectors, cargo container ports, etc.) **in survival mode only**. 
+This prevents accidental repainting when trying to dump inventory contents using the same keybind 
+(Alt+MMB by default).
+
+The protection is **face-specific**: You can paint other faces of blocks that have conveyor ports, 
+just not the face with the port itself. For example, you can paint the sides of a cargo container 
+without issue, but painting is blocked when aiming directly at the conveyor port face. A yellow 
+warning message will appear when painting is blocked.
+
+You can customize this behavior in the configuration:
+- Allow/disallow painting over a conveyor port separately for creative and survival modes
+- The default is to allow it only in creative mode, because in survival mode inventory management is more common
+
+Alternatively, you may choose to reconfigure the modifier key to something else than the default **Alt** 
+to avoid the conflicting key combination.
 
 ### Remarks
 
