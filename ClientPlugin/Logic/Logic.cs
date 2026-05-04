@@ -111,7 +111,7 @@ namespace ClientPlugin.Logic
             ActivateOnAimedBlock();
 
             // Input logic copied from MyCubeBuilder.HandleGameInput
-            var context = MySession.Static.ControlledEntity?.AuxiliaryContext ?? MyStringId.NullOrEmpty;
+            var context = MySession.Static.ControlledEntity?.ControlContext ?? MyStringId.NullOrEmpty;
             if (MyControllerHelper.IsControl(context, MyControlsSpace.CUBE_COLOR_CHANGE, MyControlStateType.PRESSED))
             {
                 // Check if we should block painting on conveyor ports
