@@ -78,6 +78,15 @@ The configuration can be changed anytime without having to restart the game.
 - Aiming to camera blocks is not possible, it may also be the case with other blocks with a very small hitbox.
 - Painting a single block is not possible, which it may be useful due to the different aiming method. 
 
+## Development
+
+Based on the [client plugin template](https://github.com/CometWorks/client-plugin-template).
+Run `setup.py` once to detect the game folder, then build the solution. Load the working copy
+through a Pulsar development folder: start Pulsar with `-sources` and add the repository with
+the Sources button. Builds deploy into Pulsar's `Local` plugin folder only if `Pulsar` is set
+in `Directory.Build.props.user` or passed as `-p:Pulsar=...`, see the template's README for
+the details.
+
 ## Legal
 
 Space Engineers is a trademark of Keen Software House s.r.o.
