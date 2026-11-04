@@ -40,6 +40,7 @@ public class Plugin : IPlugin
 
     public void Update()
     {
+        Logic.Logic.Static.Update();
     }
 
     // ReSharper disable once UnusedMember.Global
