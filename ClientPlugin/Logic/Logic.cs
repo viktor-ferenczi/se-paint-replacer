@@ -198,7 +198,11 @@ namespace ClientPlugin.Logic
 
             var subgrids = ctrl ? shift ? aimedGrid.GetGridsInLogicalGroup() : aimedGrid.GetGridsInMechanicalGroup() : null;
 
-            if (subgrids == null)
+            if (shift && !ctrl)
+            {
+                FloodFillPaint(aimedGrid);
+            }
+            else if (subgrids == null)
             {
                 ReplacePaint(aimedGrid);
             }
@@ -220,14 +224,45 @@ namespace ClientPlugin.Logic
 
             foreach (var slimBlock in grid.CubeBlocks)
             {
-                if (slimBlock.SkinSubtypeId != aimedSkinSubtypeId.Value)
-                    continue;
-
-                if ((slimBlock.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() > 0.005f * 0.005f)
-                    continue;
-
-                grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+                if (HasAimedPaint(slimBlock))
+                    grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
             }
+        }
+
+        // Repaints the blocks reachable from the aimed block through face-adjacent blocks of the aimed paint
+        private void FloodFillPaint(MyCubeGrid grid)
+        {
+            if (aimedColorMaskHsv == null || aimedSkinSubtypeId == null)
+                return;
+
+            var visited = new HashSet<MySlimBlock> { aimedBlock };
+            var queue = new Queue<MySlimBlock>();
+            queue.Enqueue(aimedBlock);
+
+            while (queue.Count != 0)
+            {
+                var block = queue.Dequeue();
+                grid.SkinBlocks(block.Position, block.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+
+                // A block may span more cells, look through the faces of all of them
+                for (var x = block.Min.X; x <= block.Max.X; x++)
+                for (var y = block.Min.Y; y <= block.Max.Y; y++)
+                for (var z = block.Min.Z; z <= block.Max.Z; z++)
+                {
+                    foreach (var direction in Base6Directions.IntDirections)
+                    {
+                        var neighbor = grid.GetCubeBlock(new Vector3I(x, y, z) + direction);
+                        if (neighbor != null && HasAimedPaint(neighbor) && visited.Add(neighbor))
+                            queue.Enqueue(neighbor);
+                    }
+                }
+            }
+        }
+
+        private bool HasAimedPaint(MySlimBlock block)
+        {
+            return block.SkinSubtypeId == aimedSkinSubtypeId.Value &&
+                   (block.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() <= 0.005f * 0.005f;
         }
 
         public bool DrawPrefix(MyCubeBuilder cubeBuilder)
@@ -272,6 +307,7 @@ namespace ClientPlugin.Logic
                 DrawHint("Aim at the block with the paint to replace", 1, x: 0f);
                 DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, x: -0.12f);
                 DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 3, x: -0.12f);
+                DrawHint("Shift+Alt+MMB: Replace on the touching blocks", 4, x: -0.12f);
                 DrawHint("Ctrl+Shift+Alt+MMB: Replace on all connected ships", 2, x: 0.12f);
                 DrawHint("Ctrl+Alt+/: Configure to hide these hints", 3, x: 0.12f);
             }
