@@ -179,7 +179,8 @@ namespace ClientPlugin.Logic
         {
             // Logic copied from the MyCubeBuilder.Change method to get the color and skin to paint with.
             // Must use reflection because the MyGuiScreenColorPicker class is internal.
-            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>()) ? new Vector3?(MyPlayer.SelectedColor) : null;
+            // The color is snapped to the precision the game sends it with, so the preview shows the color the blocks get.
+            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>()) ? new Vector3?(Snap(MyPlayer.SelectedColor)) : null;
             paintSkinSubtypeId = (bool)ApplySkinGetter.Invoke(null, Array.Empty<object>()) ? new MyStringHash?(MyStringHash.GetOrCompute(MyPlayer.SelectedArmorSkin)) : null;
         }
 
@@ -214,13 +215,22 @@ namespace ClientPlugin.Logic
             aimedSkinSubtypeId = aimedBlock?.SkinSubtypeId;
 
             if (Cfg.PreviewPaint && aimedBlock != null)
-                aimedBlock.CubeGrid.SkinBlocks(aimedBlock.Position, aimedBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+                PreviewPaint(paintColorMaskHsv, paintSkinSubtypeId);
         }
 
         private void RestorePreviewPaint()
         {
             if (Cfg.PreviewPaint && aimedBlock != null)
-                aimedBlock.CubeGrid.SkinBlocks(aimedBlock.Position, aimedBlock.Position, aimedColorMaskHsv, aimedSkinSubtypeId, false);
+                PreviewPaint(aimedColorMaskHsv, aimedSkinSubtypeId);
+        }
+
+        // The preview changes the block only locally. Sending it to the server would snap the color of
+        // the aimed block when restoring it, which leaves an armor edge around it just by aiming at it.
+        private void PreviewPaint(Vector3? colorMaskHsv, MyStringHash? skinSubtypeId)
+        {
+            var grid = aimedBlock.CubeGrid;
+            if (grid.ChangeColorAndSkin(aimedBlock, colorMaskHsv, skinSubtypeId))
+                grid.GridSystems.EmissiveSystem?.UpdateEmissivity();
         }
 
         private void ReplacePaint()
@@ -258,9 +268,10 @@ namespace ClientPlugin.Logic
             if (aimedColorMaskHsv == null || aimedSkinSubtypeId == null)
                 return;
 
+            // The aimed block may show the preview paint, which is only local
             foreach (var slimBlock in grid.CubeBlocks)
             {
-                if (HasAimedPaint(slimBlock))
+                if (slimBlock == aimedBlock || HasAimedPaint(slimBlock))
                     Repaint(grid, slimBlock);
             }
         }
@@ -303,7 +314,14 @@ namespace ClientPlugin.Logic
         private bool HasAimedPaint(MySlimBlock block)
         {
             return block.SkinSubtypeId == aimedSkinSubtypeId.Value &&
-                   (block.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() <= 0.005f * 0.005f;
+                   block.ColorMaskHSV.PackHSVToUint() == aimedColorMaskHsv.Value.PackHSVToUint();
+        }
+
+        // Painting by hand sends the color packed into an uint (MyCubeGrid.SkinBlocks), which rounds it
+        // to whole degrees of hue and whole percents of saturation and value
+        private static Vector3 Snap(Vector3 colorMaskHsv)
+        {
+            return ColorExtensions.UnpackHSVFromUint(colorMaskHsv.PackHSVToUint());
         }
 
         public bool DrawPrefix(MyCubeBuilder cubeBuilder)
