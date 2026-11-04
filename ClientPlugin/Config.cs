@@ -1,10 +1,8 @@
 using ClientPlugin.Settings;
 using ClientPlugin.Settings.Elements;
-using ClientPlugin.Settings.Tools;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using VRage.Input;
 using VRage.Utils;
 using VRageMath;
 
@@ -28,7 +26,7 @@ namespace ClientPlugin
         private Color aimedColor = Color.White;
         private bool previewPaint = true;
 
-        private Binding modifierKey = new(MyKeys.None, alt: true);
+        private ModifierKey modifierKey = ModifierKey.Alt;
         private bool paintOverConveyorPortInCreative = true;
         private bool paintOverConveyorPortInSurvival;
         
@@ -54,6 +52,13 @@ namespace ClientPlugin
         {
             get => enableInSurvival;
             set => SetField(ref enableInSurvival, value);
+        }
+
+        [Dropdown(description: "Key to hold down for replacing the paint with the middle mouse button.\nCtrl and Shift select what to replace, so they can't be the modifier key.")]
+        public ModifierKey ModifierKey
+        {
+            get => modifierKey;
+            set => SetField(ref modifierKey, value);
         }
 
         [Checkbox(label: "Paint over conveyor port in creative", description: "Allow painting when facing a conveyor port in creative mode")]

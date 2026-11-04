@@ -133,7 +133,7 @@ namespace ClientPlugin.Logic
 
         public bool HandleGameInputPrefix()
         {
-            if (!MyInput.Static.IsAnyAltKeyPressed() || 
+            if (!Cfg.ModifierKey.IsPressed() || 
                 !IsInActiveSession() || 
                 IsCharacterSeated() ||
                 !IsCharacterInFirstPersonView() ||
@@ -365,10 +365,11 @@ namespace ClientPlugin.Logic
 
                 // The text has a fixed pixel size, so keep the columns narrow enough for 1280x720
                 DrawHint("Aim at the block with the paint to replace", 1, Center);
-                DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, LeftColumn);
-                DrawHint("Shift+Alt+MMB: Flood fill", 3, LeftColumn);
-                DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 2, RightColumn);
-                DrawHint("Ctrl+Shift+Alt+MMB: Replace on all ships", 3, RightColumn);
+                var key = Cfg.ModifierKey.GetName();
+                DrawHint($"{key}+MMB: Replace on the aimed subgrid", 2, LeftColumn);
+                DrawHint($"Shift+{key}+MMB: Flood fill", 3, LeftColumn);
+                DrawHint($"Ctrl+{key}+MMB: Replace on all subgrids", 2, RightColumn);
+                DrawHint($"Ctrl+Shift+{key}+MMB: Replace on all ships", 3, RightColumn);
                 DrawHint("Ctrl+Alt+/: Configure to hide these hints", 4, Center);
             }
 

@@ -20,7 +20,8 @@ Demo video: https://youtu.be/8r47laAgTI8
 Please note, that the MMB conflicts with the "dump inventory"
 shortcut, which is frequently used in survival mode. Because 
 of this the plugin is disabled by default in survival mode. 
-Enable it in the configuration dialog only as long as needed.
+Enable it in the configuration dialog only as long as needed,
+or change the modifier key from Alt to another key there.
 
 To access the plugin's configuration press `Ctrl-Alt-/` while
 in-game and not in the GUI. Select **Paint Replacer** from
