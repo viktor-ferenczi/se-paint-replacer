@@ -27,6 +27,10 @@ to avoid conflicts with other game functions. Ctrl and Shift select what to repl
 The game still sees the key you hold down, for example Caps Lock toggles walking and Tab toggles the HUD.
 The hints on screen show the configured key.
 
+![Modifier key setting](Docs/ModifierKey.png "Modifier key setting")
+
+![Hints with Right Alt as the modifier key](Docs/Hints.png "Hints")
+
 ### Conveyor Port Protection
 
 By default, the plugin will **block painting when you're directly aiming at a conveyor port face** 
