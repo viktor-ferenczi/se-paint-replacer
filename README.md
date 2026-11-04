@@ -29,7 +29,7 @@ The hints on screen show the configured key.
 
 ![Modifier key setting](Docs/ModifierKey.png "Modifier key setting")
 
-![Hints with Right Alt as the modifier key](Docs/Hints.png "Hints")
+![Hints with Caps Lock as the modifier key](Docs/Hints.png "Hints")
 
 ### Conveyor Port Protection
 
