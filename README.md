@@ -21,8 +21,11 @@ the block selection. The aimed block will be clearly highlighted.
 - **Shift+ModifierKey+MMB**: Flood fill, replace the paint only on the aimed block and the blocks connected to it
   through touching faces of blocks with the same paint. Areas of the same paint elsewhere on the subgrid stay unchanged.
 
-The modifier key is **configurable** in the settings (see Configuration section below). By default it is **Alt**, 
-but you can change it to any other key to avoid conflicts with other game functions.
+The modifier key is **configurable** in the settings (see Configuration section below). By default it is **Alt**
+(either of them). You can pick Left Alt, Right Alt, Caps Lock, Tab, Tilde (`~`), Quote (`'`) or Backslash (`\`) instead
+to avoid conflicts with other game functions. Ctrl and Shift select what to replace, so they can't be the modifier key.
+The game still sees the key you hold down, for example Caps Lock toggles walking and Tab toggles the HUD.
+The hints on screen show the configured key.
 
 ### Conveyor Port Protection
 
