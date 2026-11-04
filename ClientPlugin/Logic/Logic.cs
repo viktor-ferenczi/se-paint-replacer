@@ -33,6 +33,13 @@ namespace ClientPlugin.Logic
         private Vector3? paintColorMaskHsv;
         private MyStringHash? paintSkinSubtypeId;
 
+        // Each repainted block makes the game update the emissivity of every emissive block on its grid,
+        // which is a render message each. The render message queue holds 1M messages per frame and the
+        // game crashes when it fills up, so big repaints are spread over frames by a message budget.
+        private const int RenderMessageBudget = 100000;
+        private const int MaxRepaintsPerFrame = 1000;
+        private readonly Queue<(MyCubeGrid Grid, Vector3I Position, Vector3? ColorMaskHsv, MyStringHash? SkinSubtypeId)> repaintQueue = new();
+
         // Reflection
         private static readonly Type MyGuiScreenColorPickerType = typeof(MyCubeGrid).Assembly.GetType("Sandbox.Game.Gui.MyGuiScreenColorPicker");
         private static readonly MethodInfo ApplyColorGetter = AccessTools.PropertyGetter(MyGuiScreenColorPickerType, "ApplyColor");
@@ -93,6 +100,35 @@ namespace ClientPlugin.Logic
         {
             var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
             return isCreative ? Cfg.PaintOverConveyorPortInCreative : Cfg.PaintOverConveyorPortInSurvival;
+        }
+
+        public void Update()
+        {
+            if (repaintQueue.Count == 0)
+                return;
+
+            if (!IsInActiveSession())
+            {
+                repaintQueue.Clear();
+                return;
+            }
+
+            var budget = RenderMessageBudget;
+            for (var i = 0; i < MaxRepaintsPerFrame && repaintQueue.Count != 0; i++)
+            {
+                var (grid, position, colorMaskHsv, skinSubtypeId) = repaintQueue.Peek();
+                if (!grid.Closed)
+                {
+                    var cost = 1 + (grid.GridSystems.EmissiveSystem?.EmissiveBlocks?.Count ?? 0);
+                    if (cost > budget && i != 0)
+                        break;
+
+                    budget -= cost;
+                    grid.SkinBlocks(position, position, colorMaskHsv, skinSubtypeId, false);
+                }
+
+                repaintQueue.Dequeue();
+            }
         }
 
         public bool HandleGameInputPrefix()
@@ -225,7 +261,7 @@ namespace ClientPlugin.Logic
             foreach (var slimBlock in grid.CubeBlocks)
             {
                 if (HasAimedPaint(slimBlock))
-                    grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+                    Repaint(grid, slimBlock);
             }
         }
 
@@ -242,7 +278,7 @@ namespace ClientPlugin.Logic
             while (queue.Count != 0)
             {
                 var block = queue.Dequeue();
-                grid.SkinBlocks(block.Position, block.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+                Repaint(grid, block);
 
                 // A block may span more cells, look through the faces of all of them
                 for (var x = block.Min.X; x <= block.Max.X; x++)
@@ -257,6 +293,11 @@ namespace ClientPlugin.Logic
                     }
                 }
             }
+        }
+
+        private void Repaint(MyCubeGrid grid, MySlimBlock block)
+        {
+            repaintQueue.Enqueue((grid, block.Position, paintColorMaskHsv, paintSkinSubtypeId));
         }
 
         private bool HasAimedPaint(MySlimBlock block)
