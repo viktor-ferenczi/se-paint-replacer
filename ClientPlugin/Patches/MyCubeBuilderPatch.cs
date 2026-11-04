@@ -17,7 +17,7 @@ namespace ClientPlugin.Patches
         {
             return Logic.Logic.Static.HandleGameInputPrefix();
         }
-        
+
         [HarmonyPrefix]
         [HarmonyBefore("Sections")]
         [HarmonyPatch(nameof(MyCubeBuilder.Draw))]
