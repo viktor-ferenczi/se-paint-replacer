@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
-<PluginData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="GitHubPlugin">
-    
+<PluginData
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="GitHubPlugin"
+>
   <Id>viktor-ferenczi/se-paint-replacer</Id>
   <RepoId>viktor-ferenczi/se-paint-replacer</RepoId>
-    
+
   <FriendlyName>Paint Replacer</FriendlyName>
   <Author>Viktor</Author>
-    
+
   <Tooltip>Replace paint on your ship or station</Tooltip>
   <Description>Activate the paint replacement mode by holding down the Alt key while aiming at a block.
 
@@ -41,7 +44,6 @@ Enjoy!
   <SourceDirectories>
     <Directory>ClientPlugin</Directory>
   </SourceDirectories>
-    
-  <Commit>8a433e16590d3aa356b7539249b29cb7c213985e</Commit>
 
+  <Commit>8a433e16590d3aa356b7539249b29cb7c213985e</Commit>
 </PluginData>

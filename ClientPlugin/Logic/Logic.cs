@@ -38,42 +38,61 @@ namespace ClientPlugin.Logic
         // game crashes when it fills up, so big repaints are spread over frames by a message budget.
         private const int RenderMessageBudget = 100000;
         private const int MaxRepaintsPerFrame = 1000;
-        private readonly Queue<(MyCubeGrid Grid, Vector3I Position, Vector3? ColorMaskHsv, MyStringHash? SkinSubtypeId)> repaintQueue = new();
+        private readonly Queue<(
+            MyCubeGrid Grid,
+            Vector3I Position,
+            Vector3? ColorMaskHsv,
+            MyStringHash? SkinSubtypeId
+        )> repaintQueue = new();
 
         // Reflection
-        private static readonly Type MyGuiScreenColorPickerType = typeof(MyCubeGrid).Assembly.GetType("Sandbox.Game.Gui.MyGuiScreenColorPicker");
-        private static readonly MethodInfo ApplyColorGetter = AccessTools.PropertyGetter(MyGuiScreenColorPickerType, "ApplyColor");
-        private static readonly MethodInfo ApplySkinGetter = AccessTools.PropertyGetter(MyGuiScreenColorPickerType, "ApplySkin");
-        private static readonly MethodInfo ClearRenderData = AccessTools.DeclaredMethod(typeof(MyCubeBuilder), "ClearRenderData");
-        private static readonly FieldInfo ScreensField = AccessTools.DeclaredField(typeof(MyScreenManager), "m_screens");
+        private static readonly Type MyGuiScreenColorPickerType =
+            typeof(MyCubeGrid).Assembly.GetType("Sandbox.Game.Gui.MyGuiScreenColorPicker");
+        private static readonly MethodInfo ApplyColorGetter = AccessTools.PropertyGetter(
+            MyGuiScreenColorPickerType,
+            "ApplyColor"
+        );
+        private static readonly MethodInfo ApplySkinGetter = AccessTools.PropertyGetter(
+            MyGuiScreenColorPickerType,
+            "ApplySkin"
+        );
+        private static readonly MethodInfo ClearRenderData = AccessTools.DeclaredMethod(
+            typeof(MyCubeBuilder),
+            "ClearRenderData"
+        );
+        private static readonly FieldInfo ScreensField = AccessTools.DeclaredField(
+            typeof(MyScreenManager),
+            "m_screens"
+        );
 
         private bool IsInActiveSession()
         {
             // Guard conditions
-            return MySession.Static != null &&
-                   MySession.Static.IsValid &&
-                   MySession.Static.Ready &&
-                   !MySession.Static.IsUnloading &&
-                   MyCubeBuilder.Static != null &&
-                   MyInput.Static != null &&
-                   MySandboxGame.Static != null;
+            return MySession.Static != null
+                && MySession.Static.IsValid
+                && MySession.Static.Ready
+                && !MySession.Static.IsUnloading
+                && MyCubeBuilder.Static != null
+                && MyInput.Static != null
+                && MySandboxGame.Static != null;
         }
-        
+
         private bool IsCharacterSeated()
         {
-            return MySession.Static?.LocalCharacter != null &&
-                   MySession.Static.LocalCharacter.IsSitting;
+            return MySession.Static?.LocalCharacter != null
+                && MySession.Static.LocalCharacter.IsSitting;
         }
 
         private static bool IsCharacterInFirstPersonView()
         {
-            return MySession.Static?.LocalCharacter != null &&
-                   MySession.Static.LocalCharacter.IsInFirstPersonView;
+            return MySession.Static?.LocalCharacter != null
+                && MySession.Static.LocalCharacter.IsInFirstPersonView;
         }
 
         private static bool IsEnabledInGameMode()
         {
-            var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
+            var isCreative =
+                MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
             return isCreative ? Cfg.EnableInCreative : Cfg.EnableInSurvival;
         }
 
@@ -88,7 +107,8 @@ namespace ClientPlugin.Logic
             // Check if this is a conveyor/inventory use object by examining supported actions
             // MyUseObjectInventory is marked with [MyUseObject("conveyor")] and [MyUseObject("inventory")]
             // and has the following action combination:
-            var hasInventoryAccess = (useObject.SupportedActions & UseActionEnum.OpenInventory) != 0;
+            var hasInventoryAccess =
+                (useObject.SupportedActions & UseActionEnum.OpenInventory) != 0;
             var hasTerminalAccess = (useObject.SupportedActions & UseActionEnum.OpenTerminal) != 0;
             var isPrimaryInventory = useObject.PrimaryAction == UseActionEnum.OpenInventory;
 
@@ -98,8 +118,11 @@ namespace ClientPlugin.Logic
 
         private static bool IsPaintingOverConveyorPortAllowed()
         {
-            var isCreative = MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
-            return isCreative ? Cfg.PaintOverConveyorPortInCreative : Cfg.PaintOverConveyorPortInSurvival;
+            var isCreative =
+                MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
+            return isCreative
+                ? Cfg.PaintOverConveyorPortInCreative
+                : Cfg.PaintOverConveyorPortInSurvival;
         }
 
         public void Update()
@@ -133,11 +156,13 @@ namespace ClientPlugin.Logic
 
         public bool HandleGameInputPrefix()
         {
-            if (!Cfg.ModifierKey.IsPressed() || 
-                !IsInActiveSession() || 
-                IsCharacterSeated() ||
-                !IsCharacterInFirstPersonView() ||
-                !IsEnabledInGameMode())
+            if (
+                !Cfg.ModifierKey.IsPressed()
+                || !IsInActiveSession()
+                || IsCharacterSeated()
+                || !IsCharacterInFirstPersonView()
+                || !IsEnabledInGameMode()
+            )
             {
                 Reset();
                 return true;
@@ -147,11 +172,21 @@ namespace ClientPlugin.Logic
             ActivateOnAimedBlock();
 
             // Input logic copied from MyCubeBuilder.HandleGameInput
-            var context = MySession.Static.ControlledEntity?.ControlContext ?? MyStringId.NullOrEmpty;
-            if (MyControllerHelper.IsControl(context, MyControlsSpace.CUBE_COLOR_CHANGE, MyControlStateType.PRESSED))
+            var context =
+                MySession.Static.ControlledEntity?.ControlContext ?? MyStringId.NullOrEmpty;
+            if (
+                MyControllerHelper.IsControl(
+                    context,
+                    MyControlsSpace.CUBE_COLOR_CHANGE,
+                    MyControlStateType.PRESSED
+                )
+            )
             {
                 // Check if we should block painting on conveyor ports
-                if (IsPaintingOverConveyorPortAllowed() || !IsCurrentlyAimedConveyorPortHighlighted())
+                if (
+                    IsPaintingOverConveyorPortAllowed()
+                    || !IsCurrentlyAimedConveyorPortHighlighted()
+                )
                 {
                     ReplacePaint();
                 }
@@ -180,8 +215,12 @@ namespace ClientPlugin.Logic
             // Logic copied from the MyCubeBuilder.Change method to get the color and skin to paint with.
             // Must use reflection because the MyGuiScreenColorPicker class is internal.
             // The color is snapped to the precision the game sends it with, so the preview shows the color the blocks get.
-            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>()) ? new Vector3?(Snap(MyPlayer.SelectedColor)) : null;
-            paintSkinSubtypeId = (bool)ApplySkinGetter.Invoke(null, Array.Empty<object>()) ? new MyStringHash?(MyStringHash.GetOrCompute(MyPlayer.SelectedArmorSkin)) : null;
+            paintColorMaskHsv = (bool)ApplyColorGetter.Invoke(null, Array.Empty<object>())
+                ? new Vector3?(Snap(MyPlayer.SelectedColor))
+                : null;
+            paintSkinSubtypeId = (bool)ApplySkinGetter.Invoke(null, Array.Empty<object>())
+                ? new MyStringHash?(MyStringHash.GetOrCompute(MyPlayer.SelectedArmorSkin))
+                : null;
         }
 
         private void ActivateOnAimedBlock()
@@ -191,13 +230,20 @@ namespace ClientPlugin.Logic
             var currentlyAimedBlock = active ? MyCubeBuilderHelper.GetAimedBlock() : null;
 
             // Special case when getting close to a conveyor port and it gets highlighted
-            if (aimedBlock != null && !IsPaintingOverConveyorPortAllowed() && IsCurrentlyAimedConveyorPortHighlighted())
+            if (
+                aimedBlock != null
+                && !IsPaintingOverConveyorPortAllowed()
+                && IsCurrentlyAimedConveyorPortHighlighted()
+            )
                 currentlyAimedBlock = null;
 
             // Continue aiming at the same block?
-            if (currentlyAimedBlock != null && aimedBlock != null &&
-                currentlyAimedBlock.CubeGrid?.EntityId == aimedBlock.CubeGrid?.EntityId &&
-                currentlyAimedBlock.Min == aimedBlock.Min)
+            if (
+                currentlyAimedBlock != null
+                && aimedBlock != null
+                && currentlyAimedBlock.CubeGrid?.EntityId == aimedBlock.CubeGrid?.EntityId
+                && currentlyAimedBlock.Min == aimedBlock.Min
+            )
                 return;
 
             RestorePreviewPaint();
@@ -210,7 +256,7 @@ namespace ClientPlugin.Logic
                 aimedBlock = null;
                 return;
             }
-            
+
             aimedColorMaskHsv = aimedBlock?.ColorMaskHSV;
             aimedSkinSubtypeId = aimedBlock?.SkinSubtypeId;
 
@@ -236,13 +282,22 @@ namespace ClientPlugin.Logic
         private void ReplacePaint()
         {
             var aimedGrid = aimedBlock?.CubeGrid;
-            if (aimedGrid == null || aimedGrid.Closed || !aimedGrid.InScene || aimedGrid.Physics == null)
+            if (
+                aimedGrid == null
+                || aimedGrid.Closed
+                || !aimedGrid.InScene
+                || aimedGrid.Physics == null
+            )
                 return;
 
             var ctrl = MyInput.Static.IsAnyCtrlKeyPressed();
             var shift = MyInput.Static.IsAnyShiftKeyPressed();
 
-            var subgrids = ctrl ? shift ? aimedGrid.GetGridsInLogicalGroup() : aimedGrid.GetGridsInMechanicalGroup() : null;
+            var subgrids = ctrl
+                ? shift
+                    ? aimedGrid.GetGridsInLogicalGroup()
+                    : aimedGrid.GetGridsInMechanicalGroup()
+                : null;
 
             if (shift && !ctrl)
             {
@@ -313,8 +368,8 @@ namespace ClientPlugin.Logic
 
         private bool HasAimedPaint(MySlimBlock block)
         {
-            return block.SkinSubtypeId == aimedSkinSubtypeId.Value &&
-                   block.ColorMaskHSV.PackHSVToUint() == aimedColorMaskHsv.Value.PackHSVToUint();
+            return block.SkinSubtypeId == aimedSkinSubtypeId.Value
+                && block.ColorMaskHSV.PackHSVToUint() == aimedColorMaskHsv.Value.PackHSVToUint();
         }
 
         // Painting by hand sends the color packed into an uint (MyCubeGrid.SkinBlocks), which rounds it
@@ -339,13 +394,15 @@ namespace ClientPlugin.Logic
                 return true;
             foreach (var screen in screens)
             {
-                if (screen is MyGuiScreenGamePlay ||
-                    screen is MyGuiScreenHudBase)
+                if (screen is MyGuiScreenGamePlay || screen is MyGuiScreenHudBase)
                     continue;
 
                 var name = screen.GetType().Name;
-                if (name == "MyGuiScreenDebugTiming" || // Compatibility with Shift-F11 statistics
-                    name == "FPSOverlay") // Compatibility with the FPS Counter plugin
+                if (
+                    name == "MyGuiScreenDebugTiming"
+                    || // Compatibility with Shift-F11 statistics
+                    name == "FPSOverlay"
+                ) // Compatibility with the FPS Counter plugin
                     continue;
 
                 return true;
@@ -381,13 +438,23 @@ namespace ClientPlugin.Logic
             var v4Color = color.ToVector4();
             for (var i = 0; i < Cfg.HighlightDensity; i++)
             {
-                MyCubeBuilder.DrawSemiTransparentBox(aimedBlock.CubeGrid, block, v4Color, lineMaterial: Cfg.BlockMaterial, lineColor: v4Color, onlyWireframe: true);
+                MyCubeBuilder.DrawSemiTransparentBox(
+                    aimedBlock.CubeGrid,
+                    block,
+                    v4Color,
+                    lineMaterial: Cfg.BlockMaterial,
+                    lineColor: v4Color,
+                    onlyWireframe: true
+                );
             }
         }
-        
-        private const MyGuiDrawAlignEnum Center = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP;
-        private const MyGuiDrawAlignEnum LeftColumn = MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP;
-        private const MyGuiDrawAlignEnum RightColumn = MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
+
+        private const MyGuiDrawAlignEnum Center =
+            MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP;
+        private const MyGuiDrawAlignEnum LeftColumn =
+            MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP;
+        private const MyGuiDrawAlignEnum RightColumn =
+            MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
 
         private void DrawHint(string text, int lineNumber, MyGuiDrawAlignEnum align)
         {
@@ -395,13 +462,25 @@ namespace ClientPlugin.Logic
                 return;
 
             // The columns are aligned to the screen center with a small gap between them
-            var x = align == LeftColumn ? 0.49f : align == RightColumn ? 0.51f : 0.5f;
+            var x =
+                align == LeftColumn ? 0.49f
+                : align == RightColumn ? 0.51f
+                : 0.5f;
             var y = 0.04f * (lineNumber - 1);
-            var screenCoord = new Vector2(MyRenderProxy.MainViewport.Width * x, MyRenderProxy.MainViewport.Height * (Cfg.TextPosition + y));
+            var screenCoord = new Vector2(
+                MyRenderProxy.MainViewport.Width * x,
+                MyRenderProxy.MainViewport.Height * (Cfg.TextPosition + y)
+            );
 
             if (Cfg.TextShadowOffset != 0 && Cfg.TextShadowColor.A != 0)
             {
-                MyRenderProxy.DebugDrawText2D(screenCoord + new Vector2(Cfg.TextShadowOffset), text, Cfg.TextShadowColor, 1f, align);
+                MyRenderProxy.DebugDrawText2D(
+                    screenCoord + new Vector2(Cfg.TextShadowOffset),
+                    text,
+                    Cfg.TextShadowColor,
+                    1f,
+                    align
+                );
             }
 
             MyRenderProxy.DebugDrawText2D(screenCoord, text, Cfg.HintColor, 1f, align);

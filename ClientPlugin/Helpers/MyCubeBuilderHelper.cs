@@ -23,7 +23,9 @@ namespace ClientPlugin.Tools
             // holds them.
             var hitPosition = hitInfo.Value.Position;
             var rayDirection = placementProvider.RayDirection;
-            var passedBlock = hitGrid.GetCubeBlock(hitGrid.WorldToGridInteger(hitPosition - rayDirection * hitGrid.GridSize * 0.05));
+            var passedBlock = hitGrid.GetCubeBlock(
+                hitGrid.WorldToGridInteger(hitPosition - rayDirection * hitGrid.GridSize * 0.05)
+            );
             if (passedBlock != null && !passedBlock.BlockDefinition.HasPhysics)
                 return passedBlock;
 

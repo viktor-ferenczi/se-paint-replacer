@@ -1,11 +1,10 @@
-using ClientPlugin.Settings;
-using ClientPlugin.Settings.Elements;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ClientPlugin.Settings;
+using ClientPlugin.Settings.Elements;
 using VRage.Utils;
 using VRageMath;
-
 
 namespace ClientPlugin
 {
@@ -29,9 +28,11 @@ namespace ClientPlugin
         private ModifierKey modifierKey = ModifierKey.Alt;
         private bool paintOverConveyorPortInCreative = true;
         private bool paintOverConveyorPortInSurvival;
-        
+
         // Not configurable yet
-        public readonly MyStringId BlockMaterial = MyStringId.GetOrCompute("ContainerBorderSelected");
+        public readonly MyStringId BlockMaterial = MyStringId.GetOrCompute(
+            "ContainerBorderSelected"
+        );
 
         #endregion
 
@@ -54,21 +55,29 @@ namespace ClientPlugin
             set => SetField(ref enableInSurvival, value);
         }
 
-        [Dropdown(description: "Key to hold down for replacing the paint with the middle mouse button.\nCtrl and Shift select what to replace, so they can't be the modifier key.")]
+        [Dropdown(
+            description: "Key to hold down for replacing the paint with the middle mouse button.\nCtrl and Shift select what to replace, so they can't be the modifier key."
+        )]
         public ModifierKey ModifierKey
         {
             get => modifierKey;
             set => SetField(ref modifierKey, value);
         }
 
-        [Checkbox(label: "Paint over conveyor port in creative", description: "Allow painting when facing a conveyor port in creative mode")]
+        [Checkbox(
+            label: "Paint over conveyor port in creative",
+            description: "Allow painting when facing a conveyor port in creative mode"
+        )]
         public bool PaintOverConveyorPortInCreative
         {
             get => paintOverConveyorPortInCreative;
             set => SetField(ref paintOverConveyorPortInCreative, value);
         }
 
-        [Checkbox(label: "Paint over conveyor port in survival", description: "Allow painting when facing a conveyor port in survival mode")]
+        [Checkbox(
+            label: "Paint over conveyor port in survival",
+            description: "Allow painting when facing a conveyor port in survival mode"
+        )]
         public bool PaintOverConveyorPortInSurvival
         {
             get => paintOverConveyorPortInSurvival;
@@ -97,7 +106,13 @@ namespace ClientPlugin
             set => SetField(ref hintColor, value);
         }
 
-        [Slider(0f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Text shadow offset (set to zero to turn off text shadows)")]
+        [Slider(
+            0f,
+            10f,
+            1f,
+            SliderAttribute.SliderType.Integer,
+            description: "Text shadow offset (set to zero to turn off text shadows)"
+        )]
         public int TextShadowOffset
         {
             get => textShadowOffset;
@@ -112,7 +127,13 @@ namespace ClientPlugin
         }
 
         [Separator("Block Selection")]
-        [Slider(0f, 10f, 1f, SliderAttribute.SliderType.Integer, description: "Density of the block highlight (number of overdraws, zero disables highlighting)")]
+        [Slider(
+            0f,
+            10f,
+            1f,
+            SliderAttribute.SliderType.Integer,
+            description: "Density of the block highlight (number of overdraws, zero disables highlighting)"
+        )]
         public int HighlightDensity
         {
             get => highlightDensity;
@@ -147,9 +168,14 @@ namespace ClientPlugin
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        private bool SetField<T>(
+            ref T field,
+            T value,
+            [CallerMemberName] string propertyName = null
+        )
         {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
             field = value;
             OnPropertyChanged(propertyName);
             return true;
