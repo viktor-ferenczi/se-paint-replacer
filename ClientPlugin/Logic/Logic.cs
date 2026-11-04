@@ -198,7 +198,11 @@ namespace ClientPlugin.Logic
 
             var subgrids = ctrl ? shift ? aimedGrid.GetGridsInLogicalGroup() : aimedGrid.GetGridsInMechanicalGroup() : null;
 
-            if (subgrids == null)
+            if (shift && !ctrl)
+            {
+                FloodFillPaint(aimedGrid);
+            }
+            else if (subgrids == null)
             {
                 ReplacePaint(aimedGrid);
             }
@@ -220,14 +224,45 @@ namespace ClientPlugin.Logic
 
             foreach (var slimBlock in grid.CubeBlocks)
             {
-                if (slimBlock.SkinSubtypeId != aimedSkinSubtypeId.Value)
-                    continue;
-
-                if ((slimBlock.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() > 0.005f * 0.005f)
-                    continue;
-
-                grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+                if (HasAimedPaint(slimBlock))
+                    grid.SkinBlocks(slimBlock.Position, slimBlock.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
             }
+        }
+
+        // Repaints the blocks reachable from the aimed block through face-adjacent blocks of the aimed paint
+        private void FloodFillPaint(MyCubeGrid grid)
+        {
+            if (aimedColorMaskHsv == null || aimedSkinSubtypeId == null)
+                return;
+
+            var visited = new HashSet<MySlimBlock> { aimedBlock };
+            var queue = new Queue<MySlimBlock>();
+            queue.Enqueue(aimedBlock);
+
+            while (queue.Count != 0)
+            {
+                var block = queue.Dequeue();
+                grid.SkinBlocks(block.Position, block.Position, paintColorMaskHsv, paintSkinSubtypeId, false);
+
+                // A block may span more cells, look through the faces of all of them
+                for (var x = block.Min.X; x <= block.Max.X; x++)
+                for (var y = block.Min.Y; y <= block.Max.Y; y++)
+                for (var z = block.Min.Z; z <= block.Max.Z; z++)
+                {
+                    foreach (var direction in Base6Directions.IntDirections)
+                    {
+                        var neighbor = grid.GetCubeBlock(new Vector3I(x, y, z) + direction);
+                        if (neighbor != null && HasAimedPaint(neighbor) && visited.Add(neighbor))
+                            queue.Enqueue(neighbor);
+                    }
+                }
+            }
+        }
+
+        private bool HasAimedPaint(MySlimBlock block)
+        {
+            return block.SkinSubtypeId == aimedSkinSubtypeId.Value &&
+                   (block.ColorMaskHSV - aimedColorMaskHsv.Value).AbsMax() <= 0.005f * 0.005f;
         }
 
         public bool DrawPrefix(MyCubeBuilder cubeBuilder)
@@ -262,18 +297,20 @@ namespace ClientPlugin.Logic
             // Show warning if painting is blocked due to conveyor port
             if (!IsPaintingOverConveyorPortAllowed() && IsCurrentlyAimedConveyorPortHighlighted())
             {
-                DrawHint("Painting blocked because a conveyor port is highlighted", 1, -0.05f);
+                DrawHint("Painting blocked because a conveyor port is highlighted", 1, Center);
             }
             else
             {
                 if (aimedBlock != null)
                     DrawBlock(aimedBlock, Cfg.AimedColor);
 
-                DrawHint("Aim at the block with the paint to replace", 1, x: 0f);
-                DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, x: -0.12f);
-                DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 3, x: -0.12f);
-                DrawHint("Ctrl+Shift+Alt+MMB: Replace on all connected ships", 2, x: 0.12f);
-                DrawHint("Ctrl+Alt+/: Configure to hide these hints", 3, x: 0.12f);
+                // The text has a fixed pixel size, so keep the columns narrow enough for 1280x720
+                DrawHint("Aim at the block with the paint to replace", 1, Center);
+                DrawHint("Alt+MMB: Replace on the aimed subgrid", 2, LeftColumn);
+                DrawHint("Shift+Alt+MMB: Flood fill", 3, LeftColumn);
+                DrawHint("Ctrl+Alt+MMB: Replace on all subgrids", 2, RightColumn);
+                DrawHint("Ctrl+Shift+Alt+MMB: Replace on all ships", 3, RightColumn);
+                DrawHint("Ctrl+Alt+/: Configure to hide these hints", 4, Center);
             }
 
             return false;
@@ -288,27 +325,26 @@ namespace ClientPlugin.Logic
             }
         }
         
-        private void DrawHint(string text, int lineNumber, float x)
+        private const MyGuiDrawAlignEnum Center = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP;
+        private const MyGuiDrawAlignEnum LeftColumn = MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP;
+        private const MyGuiDrawAlignEnum RightColumn = MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
+
+        private void DrawHint(string text, int lineNumber, MyGuiDrawAlignEnum align)
         {
             if (!Cfg.ShowHints)
                 return;
 
-            DrawText(text, Cfg.HintColor, lineNumber, center: false, x: 0.43f + x);
-        }
-
-        private void DrawText(string text, Color color, int lineNumber = 1, float scale = 1f, bool center = true, float x = 0.5f, float? y = null)
-        {
-            if (!y.HasValue)
-                y = 0.04f * scale * (lineNumber - 1);
-
-            var screenCoord = new Vector2(MyRenderProxy.MainViewport.Width * x, MyRenderProxy.MainViewport.Height * (Cfg.TextPosition + y.Value));
+            // The columns are aligned to the screen center with a small gap between them
+            var x = align == LeftColumn ? 0.49f : align == RightColumn ? 0.51f : 0.5f;
+            var y = 0.04f * (lineNumber - 1);
+            var screenCoord = new Vector2(MyRenderProxy.MainViewport.Width * x, MyRenderProxy.MainViewport.Height * (Cfg.TextPosition + y));
 
             if (Cfg.TextShadowOffset != 0 && Cfg.TextShadowColor.A != 0)
             {
-                MyRenderProxy.DebugDrawText2D(screenCoord + new Vector2(Cfg.TextShadowOffset), text, Cfg.TextShadowColor, scale, center ? MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP);
+                MyRenderProxy.DebugDrawText2D(screenCoord + new Vector2(Cfg.TextShadowOffset), text, Cfg.TextShadowColor, 1f, align);
             }
 
-            MyRenderProxy.DebugDrawText2D(screenCoord, text, color, scale, center ? MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP);
+            MyRenderProxy.DebugDrawText2D(screenCoord, text, Cfg.HintColor, 1f, align);
         }
     }
 }

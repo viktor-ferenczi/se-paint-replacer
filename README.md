@@ -18,6 +18,8 @@ the block selection. The aimed block will be clearly highlighted.
 - **ModifierKey+MMB**: Replace the paint on the aimed subgrid.
 - **Ctrl+ModifierKey+MMB**: Replace the paint on the mechanical group (all subgrids).
 - **Ctrl+Shift+ModifierKey+MMB**: Replace the paint on the logical group (all subgrids of all connected ships).
+- **Shift+ModifierKey+MMB**: Flood fill, replace the paint only on the aimed block and the blocks connected to it
+  through touching faces of blocks with the same paint. Areas of the same paint elsewhere on the subgrid stay unchanged.
 
 The modifier key is **configurable** in the settings (see Configuration section below). By default it is **Alt**, 
 but you can change it to any other key to avoid conflicts with other game functions.
@@ -50,6 +52,7 @@ with `Ctrl-MouseWheel` to change the distance.
 I suggest selecting no tool in hand (`0` key) while replacing colors, because it would just be in the way.
 
 Symmetry mode is not relevant, because the replacement is based on matching the color and skin instead of block positions.
+The flood fill does not cross over to other subgrids.
 
 ## Prerequisites
 
