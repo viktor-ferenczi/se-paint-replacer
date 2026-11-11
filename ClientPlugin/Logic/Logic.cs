@@ -89,11 +89,17 @@ namespace ClientPlugin.Logic
                 && MySession.Static.LocalCharacter.IsInFirstPersonView;
         }
 
+        // A Creative game mode world, or a survival world with admin creative tools on
+        private static bool IsCreative()
+        {
+            var session = MySession.Static;
+            return session != null
+                && (session.CreativeMode || session.CreativeToolsEnabled(Sync.MyId));
+        }
+
         private static bool IsEnabledInGameMode()
         {
-            var isCreative =
-                MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
-            return isCreative ? Cfg.EnableInCreative : Cfg.EnableInSurvival;
+            return IsCreative() ? Cfg.EnableInCreative : Cfg.EnableInSurvival;
         }
 
         private static bool IsCurrentlyAimedConveyorPortHighlighted()
@@ -118,9 +124,7 @@ namespace ClientPlugin.Logic
 
         private static bool IsPaintingOverConveyorPortAllowed()
         {
-            var isCreative =
-                MySession.Static != null && MySession.Static.CreativeToolsEnabled(Sync.MyId);
-            return isCreative
+            return IsCreative()
                 ? Cfg.PaintOverConveyorPortInCreative
                 : Cfg.PaintOverConveyorPortInSurvival;
         }
