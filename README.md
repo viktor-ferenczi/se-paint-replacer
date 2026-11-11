@@ -59,6 +59,8 @@ to avoid the conflicting key combination.
 
 ### Remarks
 
+The creative mode settings apply in a Creative world, and in a survival world while your admin creative tools are on.
+
 The block distance from the character is the same as normal block placement in creative mode.
 You can change the maximum distance of the aimed block by keeping any block at hand while
 with `Ctrl-MouseWheel` to change the distance.
