@@ -299,6 +299,18 @@ namespace ClientPlugin.Logic
                     : aimedGrid.GetGridsInMechanicalGroup()
                 : null;
 
+            // The aimed block shows the new paint as a local preview. It gets its own
+            // paint back first, so the repaint is a change Undo can see and take back.
+            RestorePreviewPaint();
+            var name = aimedGrid.DisplayName;
+            UndoBridge.RecordPaint(
+                subgrids ?? new List<MyCubeGrid> { aimedGrid },
+                shift && !ctrl ? $"flood filled paint on {name}"
+                    : !ctrl ? $"replaced paint on {name}"
+                    : shift ? $"replaced paint on {name} and the ships connected to it"
+                    : $"replaced paint on {name} and its subgrids"
+            );
+
             if (shift && !ctrl)
             {
                 FloodFillPaint(aimedGrid);

@@ -31,6 +31,13 @@ The hints on screen show the configured key.
 
 ![Hints with Caps Lock as the modifier key](Docs/Hints.png "Hints")
 
+### Undo
+
+With the [Undo](https://github.com/viktor-ferenczi/se-undo) plugin loaded too, each replacement is one undo
+step: Ctrl-Z gives every repainted block its old color and skin back, on all the grids it changed, and Ctrl-Y
+paints them again. This works offline, as the host of a friends game, and on a dedicated server that runs the
+Undo companion. Neither plugin needs the other.
+
 ### Conveyor Port Protection
 
 By default, the plugin will **block painting when you're directly aiming at a conveyor port face** 
